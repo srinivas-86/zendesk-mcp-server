@@ -1,0 +1,53 @@
+# Single-box deployment unit (EC2 or any Docker host).
+# Caddy terminates TLS (automatic Let's Encrypt) and proxies to the MCP server.
+#
+#   1. cp .env.example .env   # fill in Zendesk credentials
+#   2. Set MCP_DOMAIN in .env to your public DNS name (e.g. mcp.example.com)
+#   3. docker compose up -d
+#   4. Create an API key:
+#      docker compose exec zendesk-mcp zendesk-keys create --name admin --scopes "*"
+#
+# Clients connect to https://<MCP_DOMAIN>/mcp with:
+#   Authorization: Bearer zmk_...
+
+services:
+  zendesk-mcp:
+    build: .
+    image: zendesk-mcp-server:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MCP_TRANSPORT: http
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8000"
+      MCP_KEYS_DB: /data/keys.db
+      # Admin console binds 0.0.0.0 inside the container but is published
+      # ONLY on the host loopback below — reach it via SSH/SSM tunnel.
+      MCP_ADMIN_HOST: 0.0.0.0
+      MCP_ADMIN_PORT: "9000"
+    volumes:
+      - keys-data:/data
+    expose:
+      - "8000"
+    ports:
+      - "127.0.0.1:9000:9000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - zendesk-mcp
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      MCP_DOMAIN: ${MCP_DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  keys-data:
+  caddy-data:
+  caddy-config:

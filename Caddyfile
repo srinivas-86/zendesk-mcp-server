@@ -1,0 +1,16 @@
+{$MCP_DOMAIN} {
+	# Long-lived SSE streams: disable buffering and extend timeouts
+	reverse_proxy zendesk-mcp:8000 {
+		flush_interval -1
+		transport http {
+			read_timeout 300s
+			write_timeout 300s
+		}
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		-Server
+	}
+}

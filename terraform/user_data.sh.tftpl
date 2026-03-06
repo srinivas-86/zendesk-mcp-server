@@ -1,0 +1,34 @@
+#!/bin/bash
+set -euo pipefail
+
+# Bootstrap: Docker + compose + clone repo. Credentials are NOT baked in —
+# create /opt/zendesk-mcp/.env via SSM session, then `docker compose up -d`.
+
+dnf update -y
+dnf install -y docker git
+systemctl enable --now docker
+
+# docker compose v2 plugin
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+git clone "${repo_url}" /opt/zendesk-mcp
+cd /opt/zendesk-mcp
+
+# Pre-seed the domain for Caddy; operator completes .env with Zendesk credentials.
+cat > .env.bootstrap <<EOF
+MCP_DOMAIN=${domain}
+# Complete these, then: cp .env.bootstrap .env && docker compose up -d
+#ZENDESK_SUBDOMAIN=
+#ZENDESK_API_KEY=
+#ZENDESK_EMAIL=
+#ZENDESK_READ_EMAIL=
+#ZENDESK_WRITE_EMAIL=
+#MCP_ADMIN_PASSWORD=
+#MCP_WRITE_CONFIRMATION=true
+EOF
+
+docker compose build || true
+echo "Bootstrap complete. SSM in, finish .env, then: docker compose up -d"

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.YOUR_GITHUB_USER/zendesk-mcp-server",
+  "description": "Zendesk Support integration: ticket CRUD, search, users, groups, custom fields, attachments, and Help Center knowledge base, with scoped read/write permissions.",
+  "version": "0.3.0",
+  "websiteUrl": "https://github.com/YOUR_GITHUB_USER/zendesk-mcp-server",
+  "repository": {
+    "url": "https://github.com/YOUR_GITHUB_USER/zendesk-mcp-server",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.example.com/mcp"
+    }
+  ]
+}

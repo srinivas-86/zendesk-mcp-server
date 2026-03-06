@@ -1,13 +1,21 @@
 [project]
 name = "zendesk-mcp-server"
-version = "0.1.0"
-description = "A simple Zendesk MCP server"
+version = "0.3.0"
+description = "A Zendesk MCP server with Streamable HTTP transport and scoped API-key auth"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 dependencies = [
-    "mcp>=1.1.2",
+    "fastmcp>=3.4",
     "python-dotenv>=1.0.1",
     "zenpy>=2.0.56",
+    "requests>=2.31",
+    "cachetools>=5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
 ]
 
 [build-system]
@@ -16,3 +24,8 @@ build-backend = "hatchling.build"
 
 [project.scripts]
 zendesk = "zendesk_mcp_server:main"
+zendesk-keys = "zendesk_mcp_server.keys_cli:main"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
