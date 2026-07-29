@@ -234,6 +234,11 @@ proxies to the server. Create keys with
 security group (80/443 only), Elastic IP, optional Route53, and bootstraps
 Docker + the repo. Full runbook: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
+**Windows Server without Docker:** native Python + Caddy with your own TLS
+certificate + NSSM services, including a troubleshooting FAQ of real-world
+Windows issues (Node/PATH, cert chains, arg mangling):
+[docs/WINDOWS_SETUP.md](docs/WINDOWS_SETUP.md).
+
 **AWS ECS Fargate + ALB (scale-out):** `terraform/ecs/` provisions ECR, Fargate
 service, ALB with ACM/TLS 1.3, EFS-backed key store, Secrets Manager injection,
 and CloudWatch. Keep `desired_count=1` until the key store is migrated off SQLite.

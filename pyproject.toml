@@ -10,6 +10,7 @@ dependencies = [
     "zenpy>=2.0.56",
     "requests>=2.31",
     "cachetools>=5.0",
+    "truststore>=0.9",
 ]
 
 [project.optional-dependencies]

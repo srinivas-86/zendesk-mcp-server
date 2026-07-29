@@ -346,18 +346,31 @@ def _start_admin(settings: Settings, holder: ClientHolder) -> None:
 
 
 def main() -> None:
+    # Use the OS trust store (Windows cert store / macOS Keychain) for outbound
+    # TLS verification — fixes CERTIFICATE_VERIFY_FAILED on fresh Windows hosts
+    # and behind corporate TLS-inspection proxies.
+    try:
+        import truststore
+        truststore.inject_into_ssl()
+        logger.info("truststore active: TLS verification uses the OS trust store")
+    except ImportError:
+        logger.debug("truststore not installed; using default CA bundle")
+
     load_dotenv()
     settings = Settings.from_env()
     mcp = build_server(settings)
 
-    if settings.transport == "http":
-        if settings.admin_password:
-            _start_admin(settings, mcp._zendesk_holder)  # type: ignore[attr-defined]
-        logger.info("Starting Streamable HTTP transport on %s:%s/mcp", settings.host, settings.port)
-        mcp.run(transport="http", host=settings.host, port=settings.port)
-    else:
-        logger.info("Starting stdio transport")
-        mcp.run()
+    try:
+        if settings.transport == "http":
+            if settings.admin_password:
+                _start_admin(settings, mcp._zendesk_holder)  # type: ignore[attr-defined]
+            logger.info("Starting Streamable HTTP transport on %s:%s/mcp", settings.host, settings.port)
+            mcp.run(transport="http", host=settings.host, port=settings.port)
+        else:
+            logger.info("Starting stdio transport")
+            mcp.run()
+    except KeyboardInterrupt:
+        logger.info("Shutdown requested (Ctrl+C) — bye")
 
 
 if __name__ == "__main__":

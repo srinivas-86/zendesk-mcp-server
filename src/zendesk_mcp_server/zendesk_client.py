@@ -57,7 +57,10 @@ class ZendeskClient:
 
     @staticmethod
     def _cursor_sort(sort_by: str, sort_order: str) -> str:
-        field = sort_by if sort_by in ('created_at', 'updated_at', 'priority', 'status', 'id') else 'created_at'
+        # Zendesk cursor pagination only supports sorting by id, status, updated_at.
+        # created_at ordering equals id ordering, so map it to id.
+        field = {'created_at': 'id', 'updated_at': 'updated_at',
+                 'status': 'status', 'id': 'id'}.get(sort_by, 'id')
         return f"-{field}" if sort_order == 'desc' else field
 
     # ------------------------------------------------------------------
